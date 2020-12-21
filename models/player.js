@@ -6,6 +6,11 @@ class Player {
       this.myTurn = myTurn;
       this.hand = hand;
     }
+    
+    playCard(idCard) {
+      this.hand.find(x => x.id === idCard).isPlayed = true;
+      return this.hand.find(x => x.id === idCard);
+    }
   }
 
  module.exports = Player;

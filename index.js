@@ -20,10 +20,15 @@ app.get('/', (req, res) => {
     res.json({"message": "Welcome to EasyNotes application. Take notes quickly. Organize and keep track of all your notes."});
 });
 
-var amountPlayers = 4;
+var playersDefault = {
+    'max' : 6,
+    'min' : 2,
+    'default' : 4
+};
+
 var cardsPerHand = 4;
 var cardPlayed = {};
-var currentPlayer = 1;
+var currentPlayer = 0;
 var party = []; //-- List of all Players is a party
 
 const rank = {
@@ -49,24 +54,64 @@ cardColor.forEach((cardColorValue, cardColorIndex, cardColorArray) => {
 });
 
 
-
+/**
+ * Deals card for a game of the given amount of players
+ */
 app.get('/deal', (req, res) => {
     
-    var shuffle = [...deck]; //-- clones the array
+    var shuffle = [...deck]; //-- not actually shuffleing, it just clones the array, which is the deck
 
-    for (var p=1; p<=amountPlayers; p++) {
+    var pls = req.query.playersAmount ? req.query.playersAmount : playersDefault.default;
+    party = [];
+
+    for (var p=1; p <= pls; p++) {
         var hand = [];
         for (var c=0; c<cardsPerHand; c++) {
-            draw = Math.floor(Math.random() * shuffle.length);
+            draw = Math.floor(Math.random() * shuffle.length); //-- this is the 'shuffleing' deal a random card from the deck
             card = shuffle.splice(draw, 1);
-            hand.push(card);
+            hand.push(card[0]);
         }  
         party.push(new Player(uuidv4(),'John Doe ' + p, {}, false, hand));
     }
+
+    //-- after dealing the cards, redirect to the game immediately
+    res.redirect('/game');
+});
+
+/**
+ * Plays one card of the current Player
+ */
+app.get('/play', (req, res) => {
+    var idCard = req.query.idCard; 
+    var idPlayer = party[currentPlayer].id;
+    
+    var playedCard = party[currentPlayer].playCard(idCard);
+
+    
+    //-- simple round robin for now. 
+    //-- Todo: After the whole party played it is determined who starts next round
+    if (currentPlayer < party.length-1) {
+        currentPlayer++;
+    }
+    else {
+        currentPlayer = 0;
+    }
+
+    res.json(playedCard); 
+
    
+});
+ 
+/**
+ * Returns only the current state of the game
+ */
+app.get('/game', (req, res) => {
     res.json(party);
 });
 
+/**
+ * Show a player's hand
+ */
 app.get('/hand', (req, res) => { 
     
     res.json({
