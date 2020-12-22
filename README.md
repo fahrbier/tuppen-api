@@ -24,7 +24,7 @@ Useful for developing an debugging an UI but for sure not for a real game, since
 
 Makes a player to withdraw - the player is removed from the current game.
 
-##Credits
+## Credits
 
 The example UI that comes with the API code uses **CSS Playing Cards help you to create simple and semantic playing cards in (X)HTML**.
 from https://github.com/selfthinker/CSS-Playing-Cards by Anika Henke anika@selfthinker.org
