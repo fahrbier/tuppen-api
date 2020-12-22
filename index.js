@@ -71,8 +71,6 @@ app.get('/play', (req, res) => {
     
     var playedCard = party[currentPlayer].playCard(idCard);
     playersPlayed++;
-
-
     
     if (playersPlayed < playersInParty) {
         //-- round robin while a round is still in play
@@ -87,15 +85,17 @@ app.get('/play', (req, res) => {
         //-- all players in game put down a card, now see who won
         //-- find player with "Ankart" and get his card
         var anCard = party.find(x => x.hasAnCard === true).cardPlayed;
+        //-- find all players who played cards of the same color like anCard, incl. anCard        
+        var allPlayersWithCardsAlikeAnCard = party.filter(x => x.cardPlayed.color == anCard.color);
+        //-- sort that list to find next anCard Player             
+        var allPlayersRanked = allPlayersWithCardsAlikeAnCard.sort((a, b) => (a.cardPlayed.rank > b.cardPlayed.rank) ? true : false);
 
         console.log(anCard);
+        console.log(allPlayersRanked);
 
         playersPlayed = 0;
     }
     
-    console.log('currentPlayer:' + currentPlayer);
-    console.log('party.length-1:' + party.length);
-    console.log('playersPlayed:' + playersPlayed);
     res.json(playedCard); 
 });
 
