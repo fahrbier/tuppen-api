@@ -1,10 +1,14 @@
 class Card {
-    constructor(id, color, value, isPlayed) {
+    constructor(id, color, value, rank, isPlayed) {
       this.id = id;
       this.color = color;
       this.value = value;
-      this.isPlayed = isPlayed;
+      this.rank = rank;
+      this.open = isPlayed;
     }
-  }
+    isPlayed() {
+      this.open = true;
+    }
+}
 
  module.exports = Card;
