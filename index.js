@@ -17,9 +17,11 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 
 // define a simple route
-app.get('/', (req, res) => {
-    res.json({"message": "Welcome to EasyNotes application. Take notes quickly. Organize and keep track of all your notes."});
-});
+//app.get('/', (req, res) => {
+//    res.json({"message": "Welcome to EasyNotes application. Take notes quickly. Organize and keep track of all your notes."});
+//});
+
+app.use('/', express.static('static'))
 
 var playersDefault = {
     'max' : 6,
@@ -53,14 +55,14 @@ app.get('/deal', (req, res) => {
             card = shuffle.splice(draw, 1);
             hand.push(card[0]);
         }  
-        party.push(new Player(uuidv4(),'John Doe ' + p, {}, false, false, hand));
+        party.push(new Player(uuidv4(),'John Doe ' + p, {}, false, hand));
     }
 
     //-- first player of a party gets always "Ankart" for now
     party[0].giveAnCard();
 
     //-- after dealing the cards, redirect to the game immediately
-    res.redirect('/game');
+    res.redirect('/gameDebug');
 });
 
 /**
@@ -83,16 +85,28 @@ app.get('/play', (req, res) => {
     }    
     else {
         //-- all players in game put down a card, now see who won
-        //-- find player with "Ankart" and get his card
+        //-- find player with "anCard" and get his card
         var anCard = party.find(x => x.hasAnCard === true).cardPlayed;
-        //-- find all players who played cards of the same color like anCard, incl. anCard        
-        var allPlayersWithCardsAlikeAnCard = party.filter(x => x.cardPlayed.color == anCard.color);
-        //-- sort that list to find next anCard Player             
-        var allPlayersRanked = allPlayersWithCardsAlikeAnCard.sort((a, b) => (a.cardPlayed.rank > b.cardPlayed.rank) ? true : false);
+        //-- find all players who played cards of the same color like anCard, incl. anCard and rank that list       
+        var allPlayersRanked = party
+                                .filter(x => x.cardPlayed.suit == anCard.suit)
+                                .sort((a, b) => (a.cardPlayed.myRank < b.cardPlayed.myRank) ? 1 : -1);
 
-        console.log(anCard);
-        console.log(allPlayersRanked);
-
+        //-- set new anCard to first player of allPlayersRanked. 
+        party.map(function(player, index) {
+            if (player.id == allPlayersRanked[0].id) {
+                player.hasAnCard = true;
+            }
+            else {
+                player.hasAnCard = false;
+            }
+            //-- reset also the cardPlayed for the next round
+            player.cardPlayed = {};
+            return player;
+        });
+        console.log(party);
+        
+        //-- next round, new ankart start, no one played so far.
         playersPlayed = 0;
     }
     
@@ -109,26 +123,50 @@ app.get('/withdraw', (req, res) => {
 });
 
 /**
- * Returns only the current state of the game
+ * Returns the current state of the game
+ * Useful for developing an debugging an UI
+ * but for sure not for a real game, since
+ * this endpoint reveals everything
  */
-app.get('/game', (req, res) => {
+app.get('/gameDebug', (req, res) => {
     res.json(party);
 });
 
-/**
- * Show a player's hand
- */
-app.get('/hand', (req, res) => { 
-    
-    res.json({
-        'player' : req.query.player,
-        'myTurn' : req.query.player == currentPlayer, 
-        'hand': player[req.query.player]
+app.get('/game', (req, res) => {
+
+
+   
+    var idPlayer = req.query.idPlayer
+    var myPartyView = [];
+    party.forEach( function(player) {
+        if (player.id == idPlayer) {
+            myPartyView.push(player);
+            console.log('if' + player.id + '-' + idPlayer);
+        }
+        else {
+
+            //-- the following block does not yet work as intended
+            //-- it always manipulates the main state of the game
+            //-- which is not desirable here - I just want to disguise
+            //-- other player's state.
+            playerClone = player.clone();
+            console.log('else');
+            var hand = playerClone.hand;
+            hand = hand.map(function(card, index){
+                if (!card.open) {
+                    card.suit = '*';
+                    card.rank = '*';
+                    card.myRank = '*';
+                }
+                return card;
+            });
+            playerClone.hand = hand;
+            myPartyView.push(playerClone);
+        }
     });
 
+    res.json(myPartyView);
 });
-
-
 
 // listen for requests
 app.listen(3000, () => {

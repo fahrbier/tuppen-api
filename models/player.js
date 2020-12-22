@@ -1,9 +1,8 @@
 class Player {
-    constructor(id, namePlayer, cardPlayed, myTurn, hasAnCard, hand) {
+    constructor(id, namePlayer, cardPlayed, hasAnCard, hand) {
       this.id = id;
       this.namePlayer = namePlayer;
       this.cardPlayed = cardPlayed;
-      this.myTurn = myTurn;
       this.hasAnCard = hasAnCard;
       this.hand = hand;
     }
@@ -17,6 +16,11 @@ class Player {
 
     giveAnCard() {
       this.hasAnCard = true;
+    }
+
+    clone() {
+      var handClone = [...this.hand];    
+      return new Player(this.id, this.namePlayer, this.cardPlayed, this.hasAnCard, handClone)
     }
   }
 

@@ -1,9 +1,9 @@
 class Card {
-    constructor(id, color, value, rank, isPlayed) {
+    constructor(id, suit, rank, myRank, isPlayed) {
       this.id = id;
-      this.color = color;
-      this.value = value;
+      this.suit = suit;
       this.rank = rank;
+      this.myRank = myRank;
       this.open = isPlayed;
     }
     isPlayed() {
