@@ -14,15 +14,22 @@
    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <body>
+    <p>
+    <input type="text" id="idPlayer">
+    <button onClick="startGame(document.getElementById('idPlayer').value)">Spielen</button>
+    </p>
+
     <div id="gameTable"></div>
 
     <script>
         var gameTable = document.getElementById("gameTable");
 
-            axios.get('/game')
+        function startGame(idPlayer) {
+            setInterval(
+            axios.get('/game?idPlayer='+idPlayer)
                 .then(function (response) {
                     console.log(response);
-
+                    gameTable.innerHTML = '';
                     // handle success
                     response.data.forEach(function(player) {
                         var playerDiv = document.createElement("div");
@@ -38,23 +45,31 @@
                         tableUl.classList.add("table");
                         
                         player.hand.forEach(function(card) {
-                            
-                            var cardDiv = document.createElement("a");
-                            cardDiv.classList.add("card");
-                            cardDiv.classList.add("rank-" + card.rank);
-                            cardDiv.classList.add(card.suit);
-
-                            var rankSpan = document.createElement("span");
-                            rankSpan.classList.add("rank");
-                            rankSpan.innerHTML = card.rank;
-                            
-                            var suitSpan = document.createElement("span");
-                            suitSpan.classList.add("suit");
-                            suitSpan.innerHTML = '&' + card.suit + ';';
-                            
-                            cardDiv.appendChild(rankSpan);
-                            cardDiv.appendChild(suitSpan);
-
+                            if (card.suit == '*') {
+                                var cardDiv = document.createElement("div");
+                                cardDiv.classList.add("card");
+                                cardDiv.classList.add("back");
+                                cardDiv.innerHTML = '*';
+                            }
+                            else {
+                                var cardDiv = document.createElement("a");
+                                cardDiv.classList.add("card");
+                                cardDiv.classList.add("rank-" + card.rank);
+                                cardDiv.classList.add(card.suit);
+                                cardDiv.setAttribute("id", card.id);
+                                cardDiv.addEventListener('click', playCard, false);
+                                
+                                var rankSpan = document.createElement("span");
+                                rankSpan.classList.add("rank");
+                                rankSpan.innerHTML = card.rank;
+                                
+                                var suitSpan = document.createElement("span");
+                                suitSpan.classList.add("suit");
+                                suitSpan.innerHTML = '&' + card.suit + ';';
+                                
+                                cardDiv.appendChild(rankSpan);
+                                cardDiv.appendChild(suitSpan);                                
+                            }
                             var cardLi = document.createElement("li");
                             cardLi.appendChild(cardDiv);
 
@@ -65,9 +80,17 @@
                         playerDiv.appendChild(tableUl);
                         gameTable.appendChild(playerDiv);
                     });
+                }
+            ), 1000);
+        }
 
+        function playCard(e) {
+            axios.get('/play?idCard='+this.id)
+                .then(function (response) {
                     console.log(response);
-            });
+                }
+            );            
+        }
 
 
     </script>

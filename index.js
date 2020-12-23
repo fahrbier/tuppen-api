@@ -71,6 +71,10 @@ app.get('/deal', (req, res) => {
 app.get('/play', (req, res) => {
     var idCard = req.query.idCard; 
     
+    console.log('-------------------------');
+    console.log('currentPlayer:' + currentPlayer);
+    console.log('-------------------------');
+    
     var playedCard = party[currentPlayer].playCard(idCard);
     playersPlayed++;
     
@@ -104,9 +108,11 @@ app.get('/play', (req, res) => {
             player.cardPlayed = {};
             return player;
         });
-        console.log(party);
         
-        //-- next round, new ankart start, no one played so far.
+        //-- next round, new ankart start, no one played so far and set currentPlayer to the one which has ankart
+        currentPlayer = party.findIndex(function(player){
+            return player.hasAnCard == true;
+        });
         playersPlayed = 0;
     }
     
