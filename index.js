@@ -133,24 +133,15 @@ app.get('/gameDebug', (req, res) => {
 });
 
 app.get('/game', (req, res) => {
-
-
    
     var idPlayer = req.query.idPlayer
     var myPartyView = [];
     party.forEach( function(player) {
         if (player.id == idPlayer) {
             myPartyView.push(player);
-            console.log('if' + player.id + '-' + idPlayer);
         }
         else {
-
-            //-- the following block does not yet work as intended
-            //-- it always manipulates the main state of the game
-            //-- which is not desirable here - I just want to disguise
-            //-- other player's state.
             playerClone = player.clone();
-            console.log('else');
             var hand = playerClone.hand;
             hand = hand.map(function(card, index){
                 if (!card.open) {

@@ -19,7 +19,10 @@ class Player {
     }
 
     clone() {
-      var handClone = [...this.hand];    
+      //-- var handClone = [...this.hand];    THIS DOES NOT WORK FOR AN ARRAY OF OBJECTS!!! 
+      //-- let's do it like https://medium.com/javascript-in-plain-english/how-to-deep-copy-objects-and-arrays-in-javascript-7c911359b089
+      
+      var handClone = JSON.parse(JSON.stringify(this.hand));
       return new Player(this.id, this.namePlayer, this.cardPlayed, this.hasAnCard, handClone)
     }
   }
