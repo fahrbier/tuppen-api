@@ -71,10 +71,6 @@ app.get('/deal', (req, res) => {
 app.get('/play', (req, res) => {
     var idCard = req.query.idCard; 
     
-    console.log('-------------------------');
-    console.log('currentPlayer:' + currentPlayer);
-    console.log('-------------------------');
-    
     var playedCard = party[currentPlayer].playCard(idCard);
     playersPlayed++;
     
