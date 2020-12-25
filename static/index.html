@@ -24,9 +24,18 @@
     <script>
         var gameTable = document.getElementById("gameTable");
 
+
+        var addHeaders = {
+            headers: {
+                idPlayer: '',
+            }
+        }
+
         function startGame(idPlayer) {
+            addHeaders.headers.idPlayer = idPlayer;
+
             setInterval(
-            axios.get('/game?idPlayer='+idPlayer)
+            axios.get('/game', addHeaders)
                 .then(function (response) {
                     console.log(response);
                     gameTable.innerHTML = '';
@@ -81,13 +90,13 @@
                         gameTable.appendChild(playerDiv);
                     });
                 }
-            ), 1000);
+            ), 5000);
         }
 
         function playCard(e) {
-            axios.get('/play?idCard='+this.id)
+            axios.get('/play?idCard=' + this.id, addHeaders)
                 .then(function (response) {
-                    console.log(response);
+                    //console.log(response);
                 }
             );            
         }

@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const { v4: uuidv4 } = require('uuid');
 
 const Player = require('./models/Player');
+const TuppenGame = require('./models/TuppenGame');
 
 //-- get a deck of cards
 const deck = require('./services/deck');
@@ -23,29 +24,19 @@ app.use(bodyParser.json())
 
 app.use('/', express.static('static'))
 
-var playersDefault = {
-    'max' : 6,
-    'min' : 2,
-    'default' : 4
-};
-
 var cardsPerHand = 4;
 var currentPlayer = 0;
 var playersInParty = 0;
 var playersPlayed = 0;
 var party = []; //-- List of all Players is a party
 
-
-
-
 /**
  * Deals card for a game of the given amount of players
  */
 app.get('/deal', (req, res) => {
-    
     var shuffle = [...deck]; //-- not actually shuffleing, it just clones the array, which is the deck
 
-    playersInParty = req.query.playersAmount ? req.query.playersAmount : playersDefault.default;
+    playersInParty = req.query.playersAmount ? req.query.playersAmount : 4;
     party = [];
 
     for (var p=1; p <= playersInParty; p++) {
@@ -55,11 +46,24 @@ app.get('/deal', (req, res) => {
             card = shuffle.splice(draw, 1);
             hand.push(card[0]);
         }  
-        party.push(new Player(uuidv4(),'John Doe ' + p, {}, false, hand));
+        party.push(
+                    new Player(
+                        uuidv4(),
+                        'John Doe ' + p, 
+                        {}, 
+                        false, 
+                        false, 
+                        hand
+                    )
+                );
     }
 
     //-- first player of a party gets always "Ankart" for now
-    party[0].giveAnCard();
+    party[0].setHasAnCard();
+    party[0].setIsTurn();
+
+    tuppenGame = new TuppenGame(uuidv4(), party);
+
 
     //-- after dealing the cards, redirect to the game immediately
     res.redirect('/gameDebug');
@@ -69,8 +73,11 @@ app.get('/deal', (req, res) => {
  * Plays one card of the current Player
  */
 app.get('/play', (req, res) => {
+    console.log('user from header' + req.header('idPlayer'));
+    var idPlayer = req.header('idPlayer');
     var idCard = req.query.idCard; 
     
+
     var playedCard = party[currentPlayer].playCard(idCard);
     playersPlayed++;
     
@@ -82,6 +89,17 @@ app.get('/play', (req, res) => {
         else {
             currentPlayer = 0;
         }
+
+        //-- set isTurn for next player. 
+        party.map(function(player, index) {
+            if (index == currentPlayer) {
+                player.setIsTurn();
+            }
+            else {
+                player.unsetIsTurn();
+            }
+            return player;
+        });        
     }    
     else {
         //-- all players in game put down a card, now see who won
@@ -95,11 +113,12 @@ app.get('/play', (req, res) => {
         //-- set new anCard to first player of allPlayersRanked. 
         party.map(function(player, index) {
             if (player.id == allPlayersRanked[0].id) {
-                player.hasAnCard = true;
+                player.setHasAnCard();
             }
             else {
-                player.hasAnCard = false;
+                player.unsetHasAnCard();
             }
+          
             //-- reset also the cardPlayed for the next round
             player.cardPlayed = {};
             return player;
@@ -121,7 +140,7 @@ app.get('/play', (req, res) => {
  * Any Player can withdraw the game and end the round at any given time
  */
 app.get('/withdraw', (req, res) => {
-    var idPlayer = req.query.idPlayer;   
+    var idPlayer = req.header('idPlayer');   
 });
 
 /**
@@ -131,19 +150,19 @@ app.get('/withdraw', (req, res) => {
  * this endpoint reveals everything
  */
 app.get('/gameDebug', (req, res) => {
-    res.json(party);
+    res.json(tuppenGame);
 });
 
 app.get('/game', (req, res) => {
    
-    var idPlayer = req.query.idPlayer
+    var idPlayer = req.header('idPlayer')
     var myPartyView = [];
     party.forEach( function(player) {
         if (player.id == idPlayer) {
             myPartyView.push(player);
         }
         else {
-            playerClone = player.clone();
+            playerClone = JSON.parse(JSON.stringify(player));
             var hand = playerClone.hand;
             hand = hand.map(function(card, index){
                 if (!card.open) {
