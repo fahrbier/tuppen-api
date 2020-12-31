@@ -1,7 +1,12 @@
-<html>
-<head>
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
    <title>Tuppen</title>    
    <link rel="stylesheet" type="text/css" href="cards.css" media="screen" />
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
    <style>
        .player {
            height: 120px;
@@ -14,15 +19,55 @@
    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <body>
-    <p>
-    <input type="text" id="idPlayer">
-    <button onClick="startGame(document.getElementById('idPlayer').value)">Spielen</button>
-    </p>
+
+    <div class="container">
+        <div class="row">
+          <div class="col-sm">
+            One of three columns
+          </div>
+          <div class="col-sm">
+            One of three columns
+          </div>
+          <div class="col-sm">
+            One of three columns
+          </div>
+        </div>
+        <div class="row">
+            <div class="col-sm">
+              One of three columns
+            </div>
+            <div class="col-sm">
+              One of three columns
+            </div>
+            <div class="col-sm">
+              One of three columns
+            </div>
+          </div>      
+
+          <div class="row">
+            <div class="col-sm" id="myHand">
+              My Hand
+            </div>
+            <div class="col-sm" id="myTable">
+             My Table
+            </div>
+          </div>             
+          
+          <div class="input-group mb-3">
+            <input type="text" class="form-control" placeholder="Recipient's username" aria-label="Recipient's username" aria-describedby="button-addon2" id="idPlayer">
+            <button class="btn btn-outline-secondary" type="button" id="button-addon2" onClick="updateGame(document.getElementById('idPlayer').value)">Spielen</button>
+          </div>
+      </div>    
+    
+ 
 
     <div id="gameTable"></div>
 
     <script>
         var gameTable = document.getElementById("gameTable");
+        
+        var myTable = document.getElementById("myTable");
+        var myHand = document.getElementById("myHand");
 
 
         var addHeaders = {
@@ -31,16 +76,18 @@
             }
         }
 
-        function startGame(idPlayer) {
+        function updateGame(idPlayer) {
             addHeaders.headers.idPlayer = idPlayer;
 
             setInterval(
             axios.get('/game', addHeaders)
                 .then(function (response) {
-                    console.log(response);
+
                     gameTable.innerHTML = '';
+                    myTable.innerHTML = '';
+                    
                     // handle success
-                    response.data.forEach(function(player) {
+                    response.data.party.forEach(function(player) {
                         var playerDiv = document.createElement("div");
                         playerDiv.classList.add("playingCards");
                         playerDiv.classList.add("player");
@@ -88,6 +135,7 @@
 
                         playerDiv.appendChild(tableUl);
                         gameTable.appendChild(playerDiv);
+                        myTable.appendChild(playerDiv);
                     });
                 }
             ), 5000);
@@ -103,5 +151,6 @@
 
 
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
 </body>
 </html>

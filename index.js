@@ -176,8 +176,8 @@ app.get('/game', (req, res) => {
             myPartyView.push(playerClone);
         }
     });
-
-    res.json(myPartyView);
+    tuppenGame.party = myPartyView;
+    res.json(tuppenGame);
 });
 
 // listen for requests
