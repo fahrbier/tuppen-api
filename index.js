@@ -81,6 +81,18 @@ app.get('/play', (req, res) => {
     var playedCard = party[currentPlayer].playCard(idCard);
     playersPlayed++;
     
+
+    //-- set isTurn for next player. 
+    party.map(function(player, index) {
+        if (index == currentPlayer) {
+            player.setIsTurn();
+        }
+        else {
+            player.unsetIsTurn();
+        }
+        return player;
+    });  
+
     if (playersPlayed < playersInParty) {
         //-- round robin while a round is still in play
         if (currentPlayer < party.length-1) {
@@ -89,17 +101,7 @@ app.get('/play', (req, res) => {
         else {
             currentPlayer = 0;
         }
-
-        //-- set isTurn for next player. 
-        party.map(function(player, index) {
-            if (index == currentPlayer) {
-                player.setIsTurn();
-            }
-            else {
-                player.unsetIsTurn();
-            }
-            return player;
-        });        
+      
     }    
     else {
         //-- all players in game put down a card, now see who won
