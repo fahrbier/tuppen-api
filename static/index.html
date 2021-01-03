@@ -80,7 +80,7 @@
             addHeaders.headers.idPlayer = idPlayer;
 
             setInterval(
-            axios.get('/game', addHeaders)
+            axios.get('/gameDebug', addHeaders)
                 .then(function (response) {
 
                     gameTable.innerHTML = '';

@@ -1,4 +1,4 @@
-const Card = require('../models/Card').default;
+const Card = require('../models/Card');
 const { v4: uuidv4 } = require('uuid');
 
 function deck(){

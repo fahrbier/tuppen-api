@@ -17,24 +17,21 @@ app.use(bodyParser.urlencoded({ extended: true }))
 // parse requests of content-type - application/json
 app.use(bodyParser.json())
 
-// define a simple route
-//app.get('/', (req, res) => {
-//    res.json({"message": "Welcome to EasyNotes application. Take notes quickly. Organize and keep track of all your notes."});
-//});
-
 app.use('/', express.static('static'))
 
 var cardsPerHand = 4;
 var currentPlayer = 0;
 var playersInParty = 0;
 var playersPlayed = 0;
-var party = []; //-- List of all Players is a party
+var tuppenGame = {};
 
 /**
  * Deals card for a game of the given amount of players
  */
 app.get('/deal', (req, res) => {
     var shuffle = [...deck]; //-- not actually shuffleing, it just clones the array, which is the deck
+    var party = []; //-- List of all Players is a party
+
 
     playersInParty = req.query.playersAmount ? req.query.playersAmount : 4;
     party = [];
@@ -156,17 +153,19 @@ app.get('/gameDebug', (req, res) => {
 });
 
 app.get('/game', (req, res) => {
-   
+    
+    tuppenGameClone = JSON.parse(JSON.stringify(tuppenGame));
+    
     var idPlayer = req.header('idPlayer')
-    var myPartyView = [];
-    party.forEach( function(player) {
-        if (player.id == idPlayer) {
-            myPartyView.push(player);
+    var myPartyView = tuppenGameClone.party;
+    
+    myPartyView.forEach( function(playerClone) {
+        if (playerClone.id == idPlayer) {
+            myPartyView.push(playerClone);
         }
         else {
-            playerClone = JSON.parse(JSON.stringify(player));
             var hand = playerClone.hand;
-            hand = hand.map(function(card, index){
+            myPartyView.hand = playerClone.hand.map(function(card, index){
                 if (!card.open) {
                     card.suit = '*';
                     card.rank = '*';
@@ -174,12 +173,11 @@ app.get('/game', (req, res) => {
                 }
                 return card;
             });
-            playerClone.hand = hand;
             myPartyView.push(playerClone);
         }
     });
-    tuppenGame.party = myPartyView;
-    res.json(tuppenGame);
+    tuppenGameClone.party = myPartyView;
+    res.json(tuppenGameClone);
 });
 
 // listen for requests
