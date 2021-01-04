@@ -21,28 +21,11 @@
 <body>
 
     <div class="container">
-        <div class="row">
-          <div class="col-sm">
-            One of three columns
-          </div>
-          <div class="col-sm">
-            One of three columns
-          </div>
-          <div class="col-sm">
-            One of three columns
-          </div>
-        </div>
-        <div class="row">
-            <div class="col-sm">
-              One of three columns
-            </div>
-            <div class="col-sm">
-              One of three columns
-            </div>
-            <div class="col-sm">
-              One of three columns
-            </div>
-          </div>      
+
+      <div class="row playingCards fourColours faceImages" id="otherPlayers">
+
+      </div>
+    
 
           <div class="row">
             <div class="col-sm" id="myHand">
@@ -57,17 +40,9 @@
             <input type="text" class="form-control" placeholder="Recipient's username" aria-label="Recipient's username" aria-describedby="button-addon2" id="idPlayer">
             <button class="btn btn-outline-secondary" type="button" id="button-addon2" onClick="updateGame(document.getElementById('idPlayer').value)">Spielen</button>
           </div>
-      </div>    
-    
- 
-
-    <div id="gameTable"></div>
+    </div>    
 
     <script>
-        var gameTable = document.getElementById("gameTable");
-        
-        var myTable = document.getElementById("myTable");
-        var myHand = document.getElementById("myHand");
 
 
         var addHeaders = {
@@ -76,70 +51,45 @@
             }
         }
 
+        var otherPlayers = document.getElementById("otherPlayers");
+
         function updateGame(idPlayer) {
-            addHeaders.headers.idPlayer = idPlayer;
+          addHeaders.headers.idPlayer = idPlayer;
 
-            setInterval(
-            axios.get('/gameDebug', addHeaders)
+          setInterval(
+            axios.get('/game', addHeaders)
                 .then(function (response) {
+                  response.data.party.forEach(function(player) {
+                    console.log(player.id);
+                    if (player.id != idPlayer) {
+                      // <div class="col-sm"></div>
+                      var otherPlayer = document.createElement("div");
+                      otherPlayer.classList.add("col-sm");
+                      otherPlayers.appendChild(otherPlayer);
 
-                    gameTable.innerHTML = '';
-                    myTable.innerHTML = '';
-                    
-                    // handle success
-                    response.data.party.forEach(function(player) {
-                        var playerDiv = document.createElement("div");
-                        playerDiv.classList.add("playingCards");
-                        playerDiv.classList.add("player");
-                        playerDiv.setAttribute("id", player.id);
-
-                        if (player.hasAnCard) {
-                            playerDiv.classList.add("ankart");
+                      var otherPlayerTable = document.createElement("ul");
+                      otherPlayerTable.classList.add("table");
+                        
+                      player.hand.forEach(function(card) {
+                        if (card.suit == '*') {
+                          var otherPlayerCard = document.createElement("div");
+                          otherPlayerCard.classList.add("card");
+                          otherPlayerCard.classList.add("back");
+                          otherPlayerCard.innerHTML = '*';
                         }
 
-                        var tableUl = document.createElement("ul");
-                        tableUl.classList.add("table");
-                        
-                        player.hand.forEach(function(card) {
-                            if (card.suit == '*') {
-                                var cardDiv = document.createElement("div");
-                                cardDiv.classList.add("card");
-                                cardDiv.classList.add("back");
-                                cardDiv.innerHTML = '*';
-                            }
-                            else {
-                                var cardDiv = document.createElement("a");
-                                cardDiv.classList.add("card");
-                                cardDiv.classList.add("rank-" + card.rank);
-                                cardDiv.classList.add(card.suit);
-                                cardDiv.setAttribute("id", card.id);
-                                cardDiv.addEventListener('click', playCard, false);
-                                
-                                var rankSpan = document.createElement("span");
-                                rankSpan.classList.add("rank");
-                                rankSpan.innerHTML = card.rank;
-                                
-                                var suitSpan = document.createElement("span");
-                                suitSpan.classList.add("suit");
-                                suitSpan.innerHTML = '&' + card.suit + ';';
-                                
-                                cardDiv.appendChild(rankSpan);
-                                cardDiv.appendChild(suitSpan);                                
-                            }
-                            var cardLi = document.createElement("li");
-                            cardLi.appendChild(cardDiv);
+                        var otherPlayerCardPlace = document.createElement("li");
+                        otherPlayerCardPlace.appendChild(otherPlayerCard);
+                        otherPlayerTable.appendChild(otherPlayerCardPlace);
+                      });
 
-                            tableUl.appendChild(cardLi);
+                      otherPlayers.appendChild(otherPlayerTable);
+                    }
+                  });
+                })  
+          , 5000);
 
-                        });
-
-                        playerDiv.appendChild(tableUl);
-                        gameTable.appendChild(playerDiv);
-                        myTable.appendChild(playerDiv);
-                    });
-                }
-            ), 5000);
-        }
+        }// end function
 
         function playCard(e) {
             axios.get('/play?idCard=' + this.id, addHeaders)

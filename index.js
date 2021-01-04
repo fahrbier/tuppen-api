@@ -154,18 +154,14 @@ app.get('/gameDebug', (req, res) => {
 
 app.get('/game', (req, res) => {
     
-    tuppenGameClone = JSON.parse(JSON.stringify(tuppenGame));
+    //-- we need this only for display reasons, the original game must be untouched
+    var tuppenGameClone = JSON.parse(JSON.stringify(tuppenGame));
+    let idPlayer = req.header('idPlayer')
     
-    var idPlayer = req.header('idPlayer')
-    var myPartyView = tuppenGameClone.party;
-    
-    myPartyView.forEach( function(playerClone) {
-        if (playerClone.id == idPlayer) {
-            myPartyView.push(playerClone);
-        }
-        else {
-            var hand = playerClone.hand;
-            myPartyView.hand = playerClone.hand.map(function(card, index){
+    tuppenGameClone.party.forEach( function(playerClone) {
+        console.log(playerClone.id + ' - ' +  idPlayer);
+        if (playerClone.id != idPlayer) {
+            playerClone.hand = playerClone.hand.map(function(card, index){
                 if (!card.open) {
                     card.suit = '*';
                     card.rank = '*';
@@ -173,10 +169,9 @@ app.get('/game', (req, res) => {
                 }
                 return card;
             });
-            myPartyView.push(playerClone);
         }
     });
-    tuppenGameClone.party = myPartyView;
+
     res.json(tuppenGameClone);
 });
 
