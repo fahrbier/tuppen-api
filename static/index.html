@@ -28,11 +28,13 @@
     
 
           <div class="row">
-            <div class="col-sm" id="myHand">
-              My Hand
-            </div>
             <div class="col-sm" id="myTable">
-             My Table
+              Table
+            </div>
+          </div>  
+          <div class="row">
+            <div class="col-sm" id="myHand">
+             Hand
             </div>
           </div>             
           
@@ -65,7 +67,7 @@
                       // <div class="col-sm"></div>
                       var otherPlayer = document.createElement("div");
                       otherPlayer.classList.add("col-sm");
-                      otherPlayers.appendChild(otherPlayer);
+                      
 
                       var otherPlayerTable = document.createElement("ul");
                       otherPlayerTable.classList.add("table");
@@ -82,14 +84,32 @@
                         otherPlayerCardPlace.appendChild(otherPlayerCard);
                         otherPlayerTable.appendChild(otherPlayerCardPlace);
                       });
+                      
+                      otherPlayer.appendChild(otherPlayerTable);
+                      otherPlayers.appendChild(otherPlayer);
+                    }
+                    else {
+                      console.log('anderer')
+                      player.hand.forEach(function(card) {
+                        if (card.open) {
+                          console.log('sichtbar')
+                          //-- put on table 
+                        }
+                        else {
+                          console.log('unsichtbar')
+                          //-- put in my hand
+                        }
 
-                      otherPlayers.appendChild(otherPlayerTable);
+                      });
+
                     }
                   });
                 })  
           , 5000);
 
         }// end function
+
+        
 
         function playCard(e) {
             axios.get('/play?idCard=' + this.id, addHeaders)
